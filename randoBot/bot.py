@@ -18,14 +18,16 @@ async def on_message(message):
 
     if message.content.startswith('!hello'):
         msg = 'Hello {0.author.mention}'.format(message)
-        await client.send_message(message.channel, msg)
+        await message.channel.send(msg)
+
     if message.content.startswith('!op.gg'):
         length = len(message.content)
         content = message.content[6:length].strip().replace(' ', '+')
         print(content)
         link = 'https://na.op.gg/summoner/userName={username}'.format(username = content)
       
-        await client.send_message(message.channel, link)
+        await message.channel.send(link)
+
     if message.content.startswith('!rstats'):
         region = 'na1'
         length = len(message.content)
@@ -41,8 +43,9 @@ async def on_message(message):
         highesttier = rankedstats[0]['tier']
         divisionrank = rankedstats[0]['rank']
         ratio = (wins / (wins + losses)) * 100
-        rankedstatus = "Summoner Name: {summonername}\nCurrent Rank: {tier} {lp}\nWins: {win}\nLosses: {loss}\nW/L Ratio: {ratio:.2f}%\n".format(summonername = summoner_name, tier = highesttier, lp = currentlp, win = wins, loss = losses, ratio = ratio)
-        await client.send_message(message.channel, rankedstatus)
+        rankedstatus = "Summoner Name: {summonername}\nCurrent Rank: {tier} {divisionrank} {lp}\nWins: {win}\nLosses: {loss}\nW/L Ratio: {ratio:.2f}%\n".format(summonername = summoner_name, tier = highesttier, divisionrank = divisionrank, lp = currentlp, win = wins, loss = losses, ratio = ratio)
+        await message.channel.send(rankedstatus)
+
 
 @client.event   
 async def on_ready():

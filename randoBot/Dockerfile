@@ -1,6 +1,6 @@
 FROM python:3.6
 
-RUN apt-get update && python3 -m pip install discord.py==0.16.12 && pip install riotwatcher 
+RUN apt-get update && python3 -m pip install discord.py && pip install riotwatcher 
 
 COPY . /app
 WORKDIR /app
