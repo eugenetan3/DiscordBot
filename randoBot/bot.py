@@ -6,9 +6,9 @@ from riotwatcher import *
 
 
 
-TOKEN = 'NzIzMjI0MTM2NjEyMzE1MjE3.XuvhQw.vqVJ7en1wU2Ba9WNRRYlpBAmLow'
+TOKEN = 'NzIzMjI0MTM2NjEyMzE1MjE3.XuvhQw.vqVJ7en1wU2Ba9WNRRYlpBAmLow' 
 
-watcher = LolWatcher('RGAPI-466a5779-0de3-423c-b7de-c9088b68ada4')
+watcher = LolWatcher('RGAPI-466a5779-0de3-423c-b7de-c9088b68ada4') #Refreshes every 24 hr: https://developer.riotgames.com/
 client = discord.Client()
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 @client.event
@@ -34,8 +34,15 @@ async def on_message(message):
         print(user)
         rankedstats = watcher.league.by_summoner(region, user['id'])
         print(rankedstats)
-        await client.send_message(message.channel, user)
-    
+        summoner_name = rankedstats[0]['summonerName']
+        currentlp = rankedstats[0]['leaguePoints']
+        wins = rankedstats[0]['wins']
+        losses = rankedstats[0]['losses']
+        highesttier = rankedstats[0]['tier']
+        divisionrank = rankedstats[0]['rank']
+        ratio = (wins / (wins + losses)) * 100
+        rankedstatus = "Summoner Name: {summonername}\nCurrent Rank: {tier} {lp}\nWins: {win}\nLosses: {loss}\nW/L Ratio: {ratio:.2f}%\n".format(summonername = summoner_name, tier = highesttier, lp = currentlp, win = wins, loss = losses, ratio = ratio)
+        await client.send_message(message.channel, rankedstatus)
 
 @client.event   
 async def on_ready():
