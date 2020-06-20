@@ -8,7 +8,7 @@ from riotwatcher import *
 
 TOKEN = 'NzIzMjI0MTM2NjEyMzE1MjE3.XuvhQw.vqVJ7en1wU2Ba9WNRRYlpBAmLow' 
 
-watcher = LolWatcher('RGAPI-466a5779-0de3-423c-b7de-c9088b68ada4') #Refreshes every 24 hr: https://developer.riotgames.com/
+watcher = LolWatcher('RGAPI-b7e56f43-a0eb-43ac-b615-8411be4e9bb0') #Refreshes every 24 hr: https://developer.riotgames.com/
 client = discord.Client()
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 @client.event
@@ -43,7 +43,7 @@ async def on_message(message):
         highesttier = rankedstats[0]['tier']
         divisionrank = rankedstats[0]['rank']
         ratio = (wins / (wins + losses)) * 100
-        rankedstatus = "Summoner Name: {summonername}\nCurrent Rank: {tier} {divisionrank} {lp}\nWins: {win}\nLosses: {loss}\nW/L Ratio: {ratio:.2f}%\n".format(summonername = summoner_name, tier = highesttier, divisionrank = divisionrank, lp = currentlp, win = wins, loss = losses, ratio = ratio)
+        rankedstatus = "```Summoner Name: {summonername}\nCurrent Rank: {tier} {divisionrank} {lp} lp\nWins: {win}\nLosses: {loss}\nW/L Ratio: {ratio:.2f}%\n```".format(summonername = summoner_name, tier = highesttier, divisionrank = divisionrank, lp = currentlp, win = wins, loss = losses, ratio = ratio)
         await message.channel.send(rankedstatus)
 
 
