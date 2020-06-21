@@ -81,4 +81,4 @@ async def on_ready():
     print('-----')
 
 if __name__ == "__main__":
-    client.run(BOT_TOKEN)
+    client.run(client.bot_token, bot=True)
