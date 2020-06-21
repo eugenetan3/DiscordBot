@@ -2,19 +2,45 @@ import discord
 import logging
 import os
 import sys
+import json
 from riotwatcher import *
 
 
+try:
+    CONFIG_PATH = os.environ.get("CONFIG_LOC", "config.json")
+    cfgfile = open(CONFIG_PATH)
+    config = json.load(cfgfile)
+except Exception as error:
+    logging.error("Error: unable to open config file: {error}".format(error = error))
+    sys.exit(1)
 
-TOKEN = 'NzIzMjI0MTM2NjEyMzE1MjE3.XuvhQw.vqVJ7en1wU2Ba9WNRRYlpBAmLow' 
+if config is not None:
+    BOT_TOKEN = config.get("bot_token", None)
+    if BOT_TOKEN is None:
+        logging.error("Error: No bot token passed")
+        sys.exit(1)
+    RIOT_TOKEN = config.get("riot_token", None)
+    if RIOT_TOKEN is None:
+        logging.error("Error: No riot games API token passed")
+        sys.exit(1)
+    print(config)
 
-watcher = LolWatcher('RGAPI-b7e56f43-a0eb-43ac-b615-8411be4e9bb0') #Refreshes every 24 hr: https://developer.riotgames.com/
+
+watcher = LolWatcher(RIOT_TOKEN) #Refreshes every 24 hr: https://developer.riotgames.com/
 client = discord.Client()
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+client.bot_token = BOT_TOKEN
+
+
+
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
+
+    if message.content.startswith('!kill'):
+        msg = "Killing Randobot..."
+        await message.channel.send(msg)
+        sys.exit(0)
 
     if message.content.startswith('!hello'):
         msg = 'Hello {0.author.mention}'.format(message)
@@ -55,4 +81,4 @@ async def on_ready():
     print('-----')
 
 if __name__ == "__main__":
-    client.run(TOKEN)
+    client.run(BOT_TOKEN)
