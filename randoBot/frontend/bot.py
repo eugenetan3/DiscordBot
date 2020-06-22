@@ -4,6 +4,7 @@ import os
 import shlex
 import sys
 import json
+import aiohttp
 from riotwatcher import *
 
 
@@ -24,12 +25,22 @@ if config is not None:
     if RIOT_TOKEN is None:
         logging.error("Error: No riot games API token passed")
         sys.exit(1)
-    print(config)
+    BACKEND_ADDR = config.get("backend_addr", None)
+    if BACKEND_ADDR is None:
+        logging.error("Error: No backend address given")
+        sys.exit(1)
+    BACKEND_ADDR_PORT = config.get("backend_addr_port")
+    if BACKEND_PORT is None:
+        logging.error("Error: No port given")
+        sys.exit(1)
+
 
 
 watcher = LolWatcher(RIOT_TOKEN) #Refreshes every 24 hr: https://developer.riotgames.com/
 client = discord.Client()
 client.bot_token = BOT_TOKEN
+client.backend_addr = BACKEND_ADDR
+client.backend_addr_port = BACKEND_ADDR_PORT
 
 
 async def generate_payload(message):
@@ -51,10 +62,29 @@ async def generate_payload(message):
             payload["message_id"] = message.id
             payload["message_channel_id"] = message.channel.id
             payload["is_private"] = isinstance(message.channel, discord.abc.PrivateChannel)
-    print(payload)
+
     return payload
 
+async def get_reply(url, payload):
+    reply = {"response":"", "embed":""}
+    try:
+        async with client.aiohttp_session.post(url, json=payload) as response:
+            if response.status == 200:
+                jsonItem = await response.json()
+                reply["response"] = jsonItem.get("response", "")
+                reply["embed"] = jsonItem.get("embed", "")
+    except aiohttp.ClientConnectorError as error:
+        logging.warning("Error: unable to open config file: {error}".format(error = error))
 
+    return reply
+
+@client.event   
+async def on_ready():
+    client.aiohttp_session = aiohttp.ClientSession()
+    print('Logged in as')
+    print(client.user.name)
+    print(client.user.id)
+    print('-----')
 
 
 @client.event
@@ -64,7 +94,20 @@ async def on_message(message):
         payload = await generate_payload(message)
         if payload is not None:
             #send to backend server here.
-            print(message)
+            url = "http://" + client.backend_addr + ":"
+            url += client.backend_addr_port + "/command/" + payload["command"]
+            reply = await get_reply(url, payload)
+            response = reply["response"]
+            embed = None
+            try:
+                embed = discord.Embed.from_dict(reply["embed"])
+            except Exception as e:
+                logging.error("Error parsing the embed {e}")
+            if response != "" or embed is not None:
+                try:
+                    await message.channel.send(response, embed=embed)
+                except discord.DiscordException as e:
+                    logging.error("Error sending message to discord")
     return
 '''
     if message.content.startswith('!kill'):
@@ -103,12 +146,6 @@ async def on_message(message):
         await message.channel.send(rankedstatus)
 '''
 
-@client.event   
-async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
-    print('-----')
 
 if __name__ == "__main__":
     client.run(client.bot_token, bot=True)
